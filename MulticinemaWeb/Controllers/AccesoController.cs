@@ -15,14 +15,14 @@ namespace MulticinemaWeb.Controllers
             _context = context;
         }
 
- //login
+//parte del login
         public IActionResult Login()
         {
-            // Si hay sesión activa, ir al Home
+     
             if (HttpContext.Session.GetString("UsuarioNombre") != null)
                 return RedirectToAction("Index", "Home");
 
-            // Verifica si existe una cookie con el correo guardado
+         
             if (Request.Cookies.ContainsKey("CorreoGuardado"))
             {
                 ViewBag.CorreoGuardado = Request.Cookies["CorreoGuardado"];
@@ -34,7 +34,7 @@ namespace MulticinemaWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string correo, string password, bool guardarSesion)
         {
-            // Verifica correo y Password
+            // verificacion del correo y password 
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Correo == correo && u.PasswordHash == password);
 
@@ -43,7 +43,7 @@ namespace MulticinemaWeb.Controllers
                 // 1. Crea la Sesión
                 CrearSesion(usuario);
 
-               //guarda cookie
+           
                 if (guardarSesion)
                 {
                     CookieOptions options = new CookieOptions();
@@ -70,7 +70,7 @@ namespace MulticinemaWeb.Controllers
             return View();
         }
 
-      //registro
+      // seccion de registro
         public IActionResult Registrar()
         {
             return View();
