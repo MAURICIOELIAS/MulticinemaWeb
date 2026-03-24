@@ -1,0 +1,335 @@
+﻿@model IEnumerable<MulticinemaWeb.Models.Pelicula>
+
+@{
+    ViewData["Title"] = "Inicio";
+    // Filtramos las listas para usarlas abajo
+    var estrenos = Model.Where(p => p.Estado == "Estreno").ToList();
+    var cartelera = Model.Where(p => p.Estado == "Cartelera").ToList();
+}
+
+<style>
+    /* === ESTILOS GLOBALES === */
+    :root {
+        --bg-dark: #0a0e17;
+        --glass-bg: rgba(20, 30, 50, 0.65);
+        --brand-yellow: #ffc107;
+    }
+
+    body {
+        background-color: var(--bg-dark);
+        background-image: radial-gradient(circle at 10% 20%, rgba(13, 110, 253, 0.15) 0%, transparent 50%);
+        color: #e0e6ed;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Glass Effect */
+    .glass-card {
+        background: var(--glass-bg) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        color: white;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(13, 110, 253, 0.4);
+            border-color: var(--brand-yellow);
+        }
+
+    /* Carrusel y Flechas CORREGIDAS */
+    .hero-section {
+        position: relative;
+        height: 550px;
+        overflow: hidden;
+    }
+
+    .carousel-item {
+        height: 550px;
+        transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* Flechas centradas y grandes */
+    .carousel-control-prev, .carousel-control-next {
+        width: 5%;
+        opacity: 0.7;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+        .carousel-control-prev:hover, .carousel-control-next:hover {
+            opacity: 1;
+            background: rgba(0,0,0,0.2);
+        }
+
+    .banner-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        filter: blur(8px) brightness(0.4);
+        z-index: 0;
+        transform: scale(1.1);
+    }
+
+    .banner-content {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding: 0 5%;
+        background: linear-gradient(to right, rgba(10,14,23,0.95) 15%, transparent 100%);
+    }
+
+    .poster-highlight {
+        height: 420px;
+        border-radius: 12px;
+        box-shadow: 0 0 25px rgba(255, 193, 7, 0.2);
+        margin-right: 40px;
+        transition: transform 0.3s;
+    }
+
+        .poster-highlight:hover {
+            transform: scale(1.03) rotate(2deg);
+        }
+
+    /* Scroll y Cards */
+    .scroll-container {
+        display: flex;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding: 30px 0;
+        scrollbar-width: none;
+    }
+
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+    .card-movie {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        min-width: 180px;
+        margin-right: 15px;
+        transition: transform 0.3s;
+    }
+
+        .card-movie:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .card-movie img {
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            height: 270px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+    .scroll-btn {
+        background: rgba(0,0,0,0.5);
+        border: none;
+        color: white;
+        font-size: 2rem;
+        z-index: 5;
+        height: 100%;
+        width: 50px;
+        position: absolute;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .scroll-wrapper:hover .scroll-btn {
+        opacity: 1;
+    }
+
+    .btn-right {
+        right: 0;
+        background: linear-gradient(to left, #0a0e17 0%, transparent 100%);
+    }
+
+    .btn-left {
+        left: 0;
+        background: linear-gradient(to right, #0a0e17 0%, transparent 100%);
+    }
+</style>
+
+<div id="heroCarousel" class="carousel slide hero-section mb-5" data-bs-ride="carousel" data-bs-interval="5000">
+
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+        @for (int i = 0; i < estrenos.Count; i++)
+        {
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="@(i + 2)"></button>
+        }
+    </div>
+
+    <div class="carousel-inner">
+
+        <div class="carousel-item active">
+            <div class="banner-bg" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1920');"></div>
+            <div class="banner-content justify-content-center text-center">
+                <div style="max-width: 800px;">
+                    <img src="/img/logo.png" style="height: 80px; margin-bottom: 20px;" onerror="this.style.display='none'" />
+                    <h1 class="display-2 fw-bold text-white mb-3" style="text-shadow: 0 0 20px rgba(13,110,253,0.8);">Experiencia Multicinema</h1>
+                    <p class="fs-4 mb-4 text-light">Tu mejor opción en entretenimiento.</p>
+                    <a href="#cartelera-section" class="btn btn-danger btn-lg px-5 fw-bold shadow-lg rounded-pill">Ver Cartelera</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="carousel-item">
+            <div class="banner-bg" style="background-image: url('https://images.unsplash.com/photo-1585647347483-22b66260dfff?q=80&w=1920');"></div>
+            <div class="banner-content">
+                <div class="text-start ms-5">
+                    <span class="badge bg-warning text-dark mb-2 shadow">PROMOCIÓN</span>
+                    <h1 class="display-3 fw-bold">Miércoles de Promo</h1>
+                    <p class="fs-3">Combos tradicionales al <span class="text-warning fw-bold" style="text-shadow: 0 0 10px #ffc107;">30% OFF</span>.</p>
+                    <a href="#combos-section" class="btn btn-outline-warning btn-lg mt-3 rounded-pill glass-card">Ver Menú</a>
+                </div>
+            </div>
+        </div>
+
+        @foreach (var peli in estrenos)
+        {
+            <div class="carousel-item">
+                <div class="banner-bg" style="background-image: url('@peli.PosterUrl');"></div>
+                <div class="banner-content">
+                    <div class="container-fluid">
+                        <div class="row align-items-center">
+                            <div class="col-md-5 d-none d-md-block text-end">
+                                <img src="@peli.PosterUrl" class="poster-highlight" alt="@peli.Titulo" />
+                            </div>
+                            <div class="col-md-7 text-start">
+                                <span class="badge bg-danger mb-2 shadow">ESTRENO</span>
+                                <h1 class="display-3 fw-bold mb-2 text-truncate">@peli.Titulo</h1>
+                                <div class="mb-3 text-light opacity-75">
+                                    <span class="border border-secondary px-2 py-1 rounded me-2">@peli.Clasificacion</span>
+                                    <span>@peli.DuracionMinutos min</span>
+                                </div>
+                                <p class="lead text-white-50 w-75 d-none d-lg-block text-truncate">@peli.Sinopsis</p>
+                                <div class="mt-4">
+                                    <a asp-controller="Peliculas" asp-action="Details" asp-route-id="@peli.IdPelicula"
+                                       class="btn btn-primary fw-bold btn-lg px-5 shadow-lg rounded-pill">
+                                        Comprar Boletos
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Siguiente</span>
+    </button>
+</div>
+
+<div class="container-fluid px-4">
+
+    @if (estrenos.Any())
+    {
+        <h4 class="fw-bold text-white mb-0 ms-2 border-start border-4 border-primary ps-3">Estrenos Populares</h4>
+        <div class="scroll-wrapper mb-4">
+            <button class="scroll-btn btn-left" onclick="scrollList('listaEstrenos', -400)">❮</button>
+            <div id="listaEstrenos" class="scroll-container">
+                @foreach (var peli in estrenos)
+                {
+                    <div class="card-movie" onclick="window.location.href='/Peliculas/Details/@peli.IdPelicula'">
+                        <img src="@peli.PosterUrl" alt="@peli.Titulo" loading="lazy" />
+                        <div class="mt-2"><h6 class="text-white text-truncate mb-0">@peli.Titulo</h6></div>
+                    </div>
+                }
+            </div>
+            <button class="scroll-btn btn-right" onclick="scrollList('listaEstrenos', 400)">❯</button>
+        </div>
+    }
+
+    @if (cartelera.Any())
+    {
+        <h4 id="cartelera-section" class="fw-bold text-white mb-0 ms-2 pt-5 border-start border-4 border-warning ps-3">En Cartelera</h4>
+        <div class="scroll-wrapper mb-5">
+            <button class="scroll-btn btn-left" onclick="scrollList('listaCartelera', -400)">❮</button>
+            <div id="listaCartelera" class="scroll-container">
+                @foreach (var peli in cartelera)
+                {
+                    <div class="card-movie" onclick="window.location.href='/Peliculas/Details/@peli.IdPelicula'">
+                        <img src="@peli.PosterUrl" alt="@peli.Titulo" loading="lazy" />
+                        <div class="mt-2"><h6 class="text-white text-truncate mb-0">@peli.Titulo</h6></div>
+                    </div>
+                }
+            </div>
+            <button class="scroll-btn btn-right" onclick="scrollList('listaCartelera', 400)">❯</button>
+        </div>
+    }
+
+    <div id="combos-section" class="py-5" style="border-top: 1px solid rgba(255,255,255,0.1);">
+        <h2 class="text-center fw-bold text-warning mb-5" style="text-shadow: 0 0 10px rgba(255, 193, 7, 0.4);">Nuestro Menú</h2>
+        <div class="row justify-content-center">
+
+            <div class="col-md-3 mb-4">
+                <div class="card combo-card h-100 glass-card">
+                    <img src="/img/combo1.jpg" onerror="this.src='https://placehold.co/400x400/1a1d2e/FFF?text=Foto+Combo'" class="card-img-top p-4" style="height: 200px; object-fit: contain;" />
+                    <div class="card-body text-center">
+                        <h5>Combo Pareja</h5>
+                        <h3 class="text-success fw-bold" style="text-shadow: 0 0 10px rgba(40, 167, 69, 0.5);">$12.50</h3>
+                        <button class="btn btn-sm btn-outline-warning w-100 mt-2 rounded-pill">Ver Detalles</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card combo-card h-100 glass-card">
+                    <img src="/img/combo2.jpg" onerror="this.src='https://placehold.co/400x400/1a1d2e/FFF?text=Foto+Combo'" class="card-img-top p-4" style="height: 200px; object-fit: contain;" />
+                    <div class="card-body text-center">
+                        <h5>Combo Individual</h5>
+                        <h3 class="text-success fw-bold" style="text-shadow: 0 0 10px rgba(40, 167, 69, 0.5);">$8.00</h3>
+                        <button class="btn btn-sm btn-outline-warning w-100 mt-2 rounded-pill">Ver Detalles</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card combo-card h-100 glass-card">
+                    <img src="/img/nachos.jpg" onerror="this.src='https://placehold.co/400x400/1a1d2e/FFF?text=Foto+Combo'" class="card-img-top p-4" style="height: 200px; object-fit: contain;" />
+                    <div class="card-body text-center">
+                        <h5>Nachos Full</h5>
+                        <h3 class="text-success fw-bold" style="text-shadow: 0 0 10px rgba(40, 167, 69, 0.5);">$6.50</h3>
+                        <button class="btn btn-sm btn-outline-warning w-100 mt-2 rounded-pill">Ver Detalles</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function scrollList(elementId, amount) {
+        document.getElementById(elementId).scrollBy({ left: amount, behavior: 'smooth' });
+    }
+</script>

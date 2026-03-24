@@ -1,0 +1,163 @@
+﻿@model MulticinemaWeb.Models.Pelicula
+
+@{
+    ViewData["Title"] = "Detalles";
+    var videoId = "";
+    if (!string.IsNullOrEmpty(Model.TrailerUrl))
+    {
+        if (Model.TrailerUrl.Contains("v=")) { videoId = Model.TrailerUrl.Split("v=")[1].Split("&")[0]; }
+        else if (Model.TrailerUrl.Contains("youtu.be/")) { videoId = Model.TrailerUrl.Split("youtu.be/")[1]; }
+    }
+    var embedUrl = "https://www.youtube.com/embed/" + videoId;
+}
+
+<style>
+    /* 1. FORZAMOS EL MODO OSCURO EN TODA LA PÁGINA */
+    body {
+        background-color: #121212 !important;
+        color: #e0e0e0 !important;
+    }
+
+    /* Estilos Glass locales */
+    .glass-panel {
+        background: rgba(30, 35, 45, 0.7); /* Un poco más oscuro para contraste */
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: white;
+    }
+
+    .nav-tabs .nav-link {
+        color: #aaa;
+    }
+
+        .nav-tabs .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: #ffc107;
+            border-color: rgba(255,255,255,0.1);
+        }
+
+    /* --- NUEVO: ESTILOS PARA EL EFECTO NEÓN EN LA PORTADA --- */
+    .poster-wrapper {
+        position: relative;
+        display: inline-block;
+        border-radius: 12px;
+        z-index: 1;
+        /* Aseguramos que el contenedor no exceda el ancho disponible */
+        max-width: 100%;
+    }
+
+        /* Este es el brillo trasero */
+        .poster-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: inherit; /* Hereda la URL del div padre */
+            background-size: cover;
+            background-position: center;
+            filter: blur(20px) saturate(180%); /* El efecto borroso y neón */
+            transform: scale(1.02); /* Se sale un poquito para hacer el marco */
+            z-index: -1; /* Se va detrás de la foto */
+            opacity: 0.7;
+            border-radius: 12px;
+        }
+
+    .poster-img-neon {
+        display: block;
+        border-radius: 12px;
+        position: relative;
+        z-index: 2;
+        max-height: 500px;
+        width: auto;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5); /* Sombra para separar del brillo */
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-5">
+            <ul class="nav nav-tabs border-bottom-0" id="mediaTab" role="tablist">
+                <li class="nav-item"><button class="nav-link active fw-bold" id="poster-tab" data-bs-toggle="tab" data-bs-target="#poster" type="button">Portada</button></li>
+                @if (!string.IsNullOrEmpty(videoId))
+                {
+                    <li class="nav-item"><button class="nav-link fw-bold text-danger" id="trailer-tab" data-bs-toggle="tab" data-bs-target="#trailer" type="button">Ver Trailer</button></li>
+                }
+            </ul>
+
+            <div class="tab-content glass-panel p-4 shadow-lg" id="mediaTabContent">
+
+                <div class="tab-pane fade show active text-center" id="poster">
+                    @if (!string.IsNullOrEmpty(Model.PosterUrl))
+                    {
+                        <div class="poster-wrapper" style="background-image: url('@Model.PosterUrl');">
+                            <img src="@Model.PosterUrl" class="img-fluid poster-img-neon" alt="@Model.Titulo" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary mt-3">Sin imagen</div>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(videoId))
+                {
+                    <div class="tab-pane fade" id="trailer">
+                        <div class="ratio ratio-16x9"><iframe src="@embedUrl" title="Trailer" allowfullscreen></iframe></div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-7 mt-4 mt-md-0">
+            <h1 class="display-4 fw-bold text-white text-uppercase" style="text-shadow: 0 0 15px rgba(255,255,255,0.3);">@Model.Titulo</h1>
+
+            <div class="mb-4">
+                <span class="badge bg-warning text-dark fs-6 shadow">@Model.Clasificacion</span>
+                <span class="badge bg-secondary fs-6 shadow">@Model.DuracionMinutos min</span>
+                @if (Model.Estado == "Estreno")
+                {
+                    <span class="badge bg-danger fs-6 shadow">ESTRENO</span>
+                }
+            </div>
+
+            <p class="lead text-white-50">@Model.Sinopsis</p>
+
+            <hr class="border-secondary my-4" />
+
+            <h3 class="mb-3 text-warning">Horarios Disponibles</h3>
+            <p class="text-muted small">Selecciona una hora para reservar:</p>
+
+            @if (Model.Funciones.Any())
+            {
+                <div class="d-flex flex-wrap gap-3">
+                    @foreach (var funcion in Model.Funciones.OrderBy(f => f.FechaHoraInicio))
+                    {
+                        if (funcion.FechaHoraInicio > DateTime.Now)
+                        {
+                            <a asp-action="SeleccionAsientos" asp-route-id="@funcion.IdFuncion"
+                               class="btn btn-outline-light text-start p-2 d-flex flex-column align-items-center justify-content-center glass-panel"
+                               style="min-width: 130px; border: 1px solid rgba(255,255,255,0.2);">
+
+                                <span class="badge bg-primary mb-2">@funcion.FechaHoraInicio.ToString("ddd dd MMM")</span>
+                                <strong class="fs-4">@funcion.FechaHoraInicio.ToString("hh:mm tt")</strong>
+                                <span class="small text-white-50 mt-1">@funcion.IdSalaNavigation?.NombreSala</span>
+                                <span class="badge bg-success mt-2">@funcion.Precio.ToString("C")</span>
+                            </a>
+                        }
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning bg-opacity-10 border-warning text-warning">No hay funciones programadas próximamente.</div>
+            }
+
+            <div class="mt-5">
+                <a asp-action="Index" class="btn btn-link text-white-50 text-decoration-none">← Volver a Cartelera</a>
+            </div>
+        </div>
+    </div>
+</div>

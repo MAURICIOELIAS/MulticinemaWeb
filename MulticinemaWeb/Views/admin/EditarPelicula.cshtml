@@ -1,0 +1,110 @@
+﻿@model MulticinemaWeb.Models.Pelicula
+
+@{
+    ViewData["Title"] = "Editar Película";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h3 class="mb-0">✏️ Editar Película</h3>
+        </div>
+        <div class="card-body">
+
+            <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+            <form asp-action="EditarPelicula" method="post">
+
+                <input type="hidden" asp-for="IdPelicula" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Título</label>
+                            <input asp-for="Titulo" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Sinopsis</label>
+                            <textarea asp-for="Sinopsis" class="form-control" rows="5"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Duración (min)</label>
+                                <input asp-for="DuracionMinutos" type="number" class="form-control" required />
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold text-danger">Estado *</label>
+                                <select asp-for="Estado" class="form-select">
+                                    <option value="Estreno">Estreno</option>
+                                    <option value="Cartelera">Cartelera</option>
+                                    <option value="Proximamente">Proximamente</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Clasificación</label>
+                            <select asp-for="Clasificacion" class="form-select">
+                                <option value="A">Todo Público (A)</option>
+                                <option value="B">Mayores de 12 (B)</option>
+                                <option value="C">Mayores de 15 (C)</option>
+                                <option value="D">Mayores de 18 (D)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="mb-4 p-3 border rounded bg-light">
+                            <label class="form-label fw-bold"> Portada</label>
+
+                            <div class="d-flex justify-content-center mb-3">
+                                @if (!string.IsNullOrEmpty(Model.PosterUrl))
+                                {
+                                    <img src="@Model.PosterUrl" alt="Poster actual" class="img-thumbnail shadow-sm" style="height: 200px; object-fit: contain;" />
+                                }
+                                else
+                                {
+                                    <div class="text-muted border p-4">Sin Imagen</div>
+                                }
+                            </div>
+
+                            <label class="small text-muted">Pegar enlace de imagen:</label>
+                            <input asp-for="PosterUrl" class="form-control" placeholder="https://ejemplo.com/imagen.jpg" />
+                        </div>
+
+                        <div class="mb-3 p-3 border rounded bg-light">
+                            <label class="form-label fw-bold"> Trailer (URL YouTube)</label>
+                            <input asp-for="TrailerUrl" class="form-control mb-2" placeholder="https://www.youtube.com/watch?v=..." />
+
+                            @if (!string.IsNullOrEmpty(Model.TrailerUrl) && Model.TrailerUrl.Contains("youtube"))
+                            {
+                                try
+                                {
+                                    var videoId = "";
+                                    if (Model.TrailerUrl.Contains("v="))
+                                    {
+                                        videoId = Model.TrailerUrl.Split("v=")[1].Split("&")[0];
+                                    }
+                                    var embedUrl = $"https://www.youtube.com/embed/{videoId}";
+
+                                    <div class="ratio ratio-16x9 mt-2">
+                                        <iframe src="@embedUrl" title="Trailer" allowfullscreen></iframe>
+                                    </div>
+                                }
+                                catch { }
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                    <a asp-action="GestionarPeliculas" class="btn btn-secondary me-2">Cancelar</a>
+                    <button type="submit" class="btn btn-warning px-5 fw-bold">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

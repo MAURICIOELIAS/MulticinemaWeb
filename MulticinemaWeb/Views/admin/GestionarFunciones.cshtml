@@ -1,0 +1,42 @@
+﻿@model IEnumerable<MulticinemaWeb.Models.Funcione>
+@{
+    ViewData["Title"] = "Gestionar Funciones";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <h2>Funciones Programadas</h2>
+        <a asp-action="AgregarFunciones" class="btn btn-success">+ Nueva Función</a>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Película</th>
+                <th>Sala</th>
+                <th>Precio</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.FechaHoraInicio.ToString("dd/MM/yyyy hh:mm tt")</td>
+                    <td class="fw-bold">@item.IdPeliculaNavigation?.Titulo</td>
+                    <td>@item.IdSalaNavigation?.NombreSala</td>
+                    <td>@item.Precio.ToString("C")</td>
+                    <td>
+                        <a asp-action="EliminarFuncion" asp-route-id="@item.IdFuncion"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('¿Borrar esta función?');">
+                            🗑️
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <a asp-controller="Admin" asp-action="Index" class="btn btn-secondary mt-3">⬅ Volver</a>
+</div>

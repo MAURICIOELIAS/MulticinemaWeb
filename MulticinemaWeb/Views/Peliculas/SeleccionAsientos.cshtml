@@ -1,0 +1,198 @@
+﻿@model MulticinemaWeb.Models.Funcione
+
+@{
+    ViewData["Title"] = "Seleccionar Asientos";
+    var ocupados = ViewBag.AsientosOcupados as List<string> ?? new List<string>();
+    char[] filas = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
+    int asientosPorLado = 4;
+}
+
+<style>
+    /* Estilos Dark para Asientos */
+    body {
+        background-color: #0a0e17;
+        color: white;
+    }
+
+    .asiento-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 12px;
+        border-radius: 8px 8px 0 0;
+        margin: 2px;
+    }
+
+    /* Asientos Disponibles (Borde blanco en fondo oscuro) */
+    .btn-outline-light {
+        border-color: rgba(255,255,255,0.3);
+        color: rgba(255,255,255,0.7);
+    }
+
+        .btn-outline-light:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: white;
+            color: white;
+        }
+
+    /* Pantalla con Glow */
+    .pantalla {
+        background: linear-gradient(to bottom, #e0f7fa, #00bcd4); /* Azul brillante tipo cine */
+        height: 40px;
+        width: 80%;
+        margin: 0 auto 50px auto;
+        transform: perspective(300px) rotateX(-10deg);
+        box-shadow: 0 20px 50px rgba(0, 188, 212, 0.4); /* Resplandor */
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-weight: 900;
+        letter-spacing: 10px;
+        font-size: 0.8rem;
+        text-shadow: 0 0 5px rgba(255,255,255,0.8);
+    }
+
+    .fila-label {
+        width: 30px;
+        font-weight: bold;
+        color: #ffc107;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pasillo {
+        width: 60px;
+        text-align: center;
+        color: #333;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Tarjeta Resumen Glass */
+    .glass-summary {
+        background: rgba(20, 30, 50, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: white;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="text-center mb-5 fw-bold" style="text-shadow: 0 0 10px rgba(255,255,255,0.3);">Selecciona tus Butacas</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="pantalla">PANTALLA</div>
+
+            <form asp-action="Confirmacion" method="post" id="formAsientos">
+                <input type="hidden" name="IdFuncion" value="@Model.IdFuncion" />
+                <input type="hidden" name="AsientosSeleccionados" id="inputAsientos" required />
+
+                <div class="d-flex flex-column align-items-center">
+                    @foreach (var letra in filas)
+                    {
+                        <div class="d-flex mb-1 align-items-center">
+                            <div class="fila-label">@letra</div>
+
+                            @if (letra == 'H')
+                            { /* Fila Corrida */
+                                @for (int i = 1; i <= (asientosPorLado * 2) + 2; i++)
+                                {
+                                    string codigo = letra.ToString() + i;
+                                    bool isOcupado = ocupados.Contains(codigo);
+                                    if (isOcupado)
+                                    {
+                                        <button type="button" class="btn btn-secondary disabled asiento-btn opacity-25"><small>X</small></button>
+                                    }
+                                    else
+                                    {
+
+                                        <button type="button" class="btn btn-outline-light asiento-btn" data-codigo="@codigo" onclick="toggleAsiento(this)"><small>@codigo.Substring(1)</small></button>
+                                    }
+                                }
+                            }
+                            else
+                            { /* Filas Normales */
+                                @for (int i = 1; i <= asientosPorLado; i++)
+                                {
+                                    string codigo = letra.ToString() + i;
+                                    bool isOcupado = ocupados.Contains(codigo);
+                                    if (isOcupado)
+                                    {
+                                        <button type="button" class="btn btn-secondary disabled asiento-btn opacity-25"><small>X</small></button>
+                                    }
+                                    else
+                                    {
+
+                                        <button type="button" class="btn btn-outline-light asiento-btn" data-codigo="@codigo" onclick="toggleAsiento(this)"><small>@codigo.Substring(1)</small></button>
+                                    }
+                                }
+                                <div class="pasillo"><small style="color: rgba(255,255,255,0.1);">|</small></div>
+                                @for (int i = asientosPorLado + 1; i <= asientosPorLado * 2; i++)
+                                {
+                                    string codigo = letra.ToString() + i;
+                                    bool isOcupado = ocupados.Contains(codigo);
+                                    if (isOcupado)
+                                    {
+                                        <button type="button" class="btn btn-secondary disabled asiento-btn opacity-25"><small>X</small></button>
+                                    }
+                                    else
+                                    {
+
+                                        <button type="button" class="btn btn-outline-light asiento-btn" data-codigo="@codigo" onclick="toggleAsiento(this)"><small>@codigo.Substring(1)</small></button>
+                                    }
+                                }
+                            }
+                            <div class="fila-label">@letra</div>
+                        </div>
+                    }
+                </div>
+
+                <div class="card mt-5 shadow-lg border-0 glass-summary mx-auto" style="max-width: 500px;">
+                    <div class="card-body">
+                        <h5 class="card-title text-center text-warning fw-bold">Resumen de Compra</h5>
+                        <hr class="border-secondary" />
+                        <div class="d-flex justify-content-between mb-2 text-white-50"><span>Película:</span><span class="text-white text-end">@Model.IdPeliculaNavigation?.Titulo</span></div>
+                        <div class="d-flex justify-content-between mb-2 text-white-50"><span>Sala:</span><span class="text-white">@Model.IdSalaNavigation?.NombreSala</span></div>
+                        <div class="d-flex justify-content-between mb-3 text-white-50"><span>Asientos:</span><span id="lblAsientos" class="badge bg-light text-dark">-</span></div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-5">Total:</span><span id="lblTotal" class="fs-4 fw-bold text-success">$0.00</span>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100 mt-3 py-2 fw-bold" id="btnComprar" disabled>CONFIRMAR PAGO</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var precio = @Model.Precio;
+        var seleccionados = [];
+        function toggleAsiento(btn) {
+            var codigo = btn.getAttribute('data-codigo');
+            if (seleccionados.includes(codigo)) {
+                seleccionados = seleccionados.filter(item => item !== codigo);
+                btn.classList.remove('btn-warning', 'text-dark', 'fw-bold');
+                btn.classList.add('btn-outline-light'); // Vuelve a blanco
+            } else {
+                seleccionados.push(codigo);
+                btn.classList.remove('btn-outline-light');
+                btn.classList.add('btn-warning', 'text-dark', 'fw-bold'); // Se pone amarillo
+            }
+            actualizarResumen();
+        }
+        function actualizarResumen() {
+            document.getElementById('lblAsientos').innerText = seleccionados.length > 0 ? seleccionados.join(', ') : '-';
+            var total = seleccionados.length * precio;
+            document.getElementById('lblTotal').innerText = '$' + total.toFixed(2);
+            document.getElementById('inputAsientos').value = seleccionados.join(',');
+            document.getElementById('btnComprar').disabled = seleccionados.length === 0;
+        }
+    </script>
+}

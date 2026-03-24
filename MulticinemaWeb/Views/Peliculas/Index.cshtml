@@ -1,0 +1,64 @@
+﻿@model IEnumerable<MulticinemaWeb.Models.Pelicula>
+
+@{
+    ViewData["Title"] = "Cartelera";
+}
+
+<style>
+    body {
+        background-color: #0a0e17;
+        color: white;
+        font-family: sans-serif;
+    }
+
+    .glass-card {
+        background: rgba(20, 30, 50, 0.65);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        transition: transform 0.3s;
+    }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffc107; /* Amarillo al hover */
+        }
+
+    .text-title-glow {
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+</style>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-5 fw-bold text-title-glow">📽️ EXHIBIENDOSE AHORA</h1>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-5">
+                <div class="card h-100 shadow-lg glass-card overflow-hidden">
+
+                    <div style="position: relative;">
+                        <img src="@(string.IsNullOrEmpty(item.PosterUrl) ? "https://via.placeholder.com/300x450?text=Sin+Imagen" : item.PosterUrl)"
+                             class="card-img-top" alt="@item.Titulo" style="height: 450px; object-fit: cover;">
+                        <span class="badge bg-primary position-absolute top-0 end-0 m-2 shadow">@item.Clasificacion</span>
+                    </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-truncate">@item.Titulo</h5>
+                        <p class="card-text text-white-50 small flex-grow-1">@item.Sinopsis</p>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-warning">⏱ @item.DuracionMinutos min</small>
+                            <small class="text-muted">Digital 2D</small>
+                        </div>
+
+                        <a asp-action="Details" asp-route-id="@item.IdPelicula" class="btn btn-danger w-100 fw-bold shadow">
+                            🎟 Comprar Boletos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
